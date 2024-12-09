@@ -1,5 +1,7 @@
 require("dotenv").config()
 
+
+
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
@@ -9,7 +11,7 @@ const port = process.env.PORT
 const app = express()
 app.use(cors())
 app.use(bodyParser.json())
-app.use(routeSaya)
+app.use(myRoutes)
 
 app.get('/', (req, res) => {
     res.send('<h1>Express & Firestore</h1>')
