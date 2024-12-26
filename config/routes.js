@@ -2,48 +2,129 @@ const {
     getFirestore,
     setDoc,
     addDoc,
+    updateDoc,
     collection,
-
+    getDoc,
+    deleteDoc,
+    query,
+    doc,
+    orderBy,
+    getDocs,
 } = require('firebase/firestore')
+
 const { fire } = require('./firebase_config.js')
 const router = require('express').Router()
-    // const fire = require('./firebase_config')
+
 const bodyParser = require('body-parser')
-let db = getFirestore();
-router.use(bodyParser.json())
+const { v4: uuidv4 } = require("uuid")
 
-router.post('/data', (req, res) => {
+let db = getFirestore(fire);
 
-    const docRef = addDoc(collection(db, "book_store"), {
-        // title: this.setTitle || null,
-        // postText: this.setPostText || null,
-        bookName: req.bookName || 'not null',
-        bookSeries: req.bookSeries || 'not null',
-        category: req.category || 'not null',
-        date: new Date()
-    }).then(() => {
+router.use(bodyParser.json());
 
-        alert("Add Book Success!!")
+router.get('/book_data', async(req, res) => {
 
-        const docRef = doc(db, "book_store", book.uid)
-        setDoc(docRef)
-            .then(() => {
-                window.location.href = '/'
-            }).catch((err) => {
-                console.error("Error Writting Document!", err);
+    const book_data = await getDocs(collection(db, 'book_store'))
 
-            })
-    }).catch((err) => {
-        //  const errorCode = err.code;
-        const errorMessage = err.message;
-        alert(errorMessage)
-    })
-    res.send({
-        bookName: req.bookName,
-        bookSeries: req.bookSeries,
-        category: req.category,
-        date: new Date()
-    })
+    book_data.forEach((book) => {
+        if (book.exists()) {
+
+            console.log(book.id, "=>", book.data());
+        } else {
+            // docSnap.data() will be undefined in this case
+            console.log("No such document!");
+        }
+        res.send(book.data())
+    });
+
+
+
 })
+router.get('/book_data/:id', async(req, res) => {
+
+    try {
+        const { id } = req.params;
+        const data = doc(db, 'book_library', id);
+        const book_data = await getDoc(data);
+
+        console.log("ini line 55 book data", id)
+        console.log(book_data.data())
+
+        if (book_data.exists()) {
+
+            console.log("Document data : ", book_data.data());
+        } else {
+            // docSnap.data() will be undefined in this case
+            console.log("No such document!");
+        }
+
+        res.send(book_data.data())
+
+    } catch (error) {
+        res.status(404).send(error)
+    }
+
+
+})
+
+router.post('/library', async(req, res) => {
+    const book_id = uuidv4()
+
+    console.log(book_id)
+    const docData = {
+
+        title: req.body.title,
+        bookName: req.body.bookName,
+        datePublished: req.body.datePublished,
+        lastUpdate: Date.now(),
+
+    }
+    console.log("ini line 62")
+    const docRef = await addDoc(collection(db, "book_library"), docData);
+
+    console.log(docData)
+
+    res.send({ status: "Success!" })
+});
+
+
+router.put('/update/:id', async(req, res) => {
+
+    try {
+
+        const { id } = req.params
+
+        const docRef = doc(db, "book_library", id);
+
+        await updateDoc(docRef, {
+
+            title: req.body.title,
+            bookName: req.body.bookName,
+            datePublished: req.body.datePublished,
+            lastUpdate: Date.now(),
+
+        });
+
+        // console.log(update_data.data())
+
+        res.send({ status: "Success!" });
+    } catch (error) {
+        res.status(error)
+    }
+});
+
+router.delete('delete-sub-library/:id', async(req, res) => {
+
+    try {
+        const { id } = req.params;
+        const docRef = doc(db, 'book_library', id)
+        await deleteDoc(docRef)
+
+        res.status(200).send({ message: `The ${id} is deleted!` })
+    } catch (error) {
+        res.send(error)
+    }
+});
+
 
 module.exports = router

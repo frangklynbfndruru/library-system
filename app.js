@@ -12,9 +12,13 @@ const app = express()
 app.use(cors())
 app.use(bodyParser.json())
 app.use(myRoutes)
+app.set('view engine', 'ejs')
 
 app.get('/', (req, res) => {
-    res.send('<h1>Express & Firestore</h1>')
+    // res.send('<h1>Express & Firestore</h1>')
+    res.render('book_store', {
+        title: 'LIBRARY SYSTEM',
+    })
 })
 
 app.listen(port, () => {
