@@ -1,5 +1,4 @@
 const {
-    getFirestore,
     setDoc,
     addDoc,
     updateDoc,
@@ -12,35 +11,30 @@ const {
     getDocs,
 } = require('firebase/firestore')
 
-const { fire } = require('./firebase_config.js')
+const { db } = require('./firebase_config.js')
 const router = require('express').Router()
 
 const bodyParser = require('body-parser')
 const { v4: uuidv4 } = require("uuid")
+const { getAllBook, } = require('../controller/book_controller.js')
 
-let db = getFirestore(fire);
+
 
 router.use(bodyParser.json());
 
-router.get('/book_data', async(req, res) => {
-
-    const book_data = await getDocs(collection(db, 'book_store'))
-
-    book_data.forEach((book) => {
-        if (book.exists()) {
-
-            console.log(book.id, "=>", book.data());
-        } else {
-            // docSnap.data() will be undefined in this case
-            console.log("No such document!");
-        }
-        res.send(book.data())
-    });
+router.get('/getAllBook', async(req, res) => {
+    // console.log("ini line 26")
 
 
+    const result = await getAllBook();
+    console.log(result)
+        // res.status(result.statusCode).send(result.data);
+    res.send(result);
 
-})
-router.get('/book_data/:id', async(req, res) => {
+});
+
+
+router.get('/bookData/:id', async(req, res) => {
 
     try {
         const { id } = req.params;
@@ -55,12 +49,14 @@ router.get('/book_data/:id', async(req, res) => {
             console.log("Document data : ", book_data.data());
         } else {
             // docSnap.data() will be undefined in this case
-            console.log("No such document!");
+            // console.log("No such document!");
+            res.status(404).send({ message: "No such document!" })
         }
 
         res.send(book_data.data())
 
     } catch (error) {
+        console.log("ini error /line 52", error)
         res.status(404).send(error)
     }
 
@@ -96,7 +92,7 @@ router.put('/update/:id', async(req, res) => {
 
         const docRef = doc(db, "book_library", id);
 
-        await updateDoc(docRef, {
+        const update = await setDoc(docRef, {
 
             title: req.body.title,
             bookName: req.body.bookName,
@@ -104,6 +100,8 @@ router.put('/update/:id', async(req, res) => {
             lastUpdate: Date.now(),
 
         });
+
+        // await updateDoc(update);
 
         // console.log(update_data.data())
 
@@ -113,14 +111,14 @@ router.put('/update/:id', async(req, res) => {
     }
 });
 
-router.delete('delete-sub-library/:id', async(req, res) => {
+router.delete('/delete-sub-library/:id', async(req, res) => {
 
     try {
         const { id } = req.params;
         const docRef = doc(db, 'book_library', id)
         await deleteDoc(docRef)
 
-        res.status(200).send({ message: `The ${id} is deleted!` })
+        res.status(200).send({ message: `The ${id} is delete!` })
     } catch (error) {
         res.send(error)
     }

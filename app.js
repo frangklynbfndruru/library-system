@@ -6,7 +6,14 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const myRoutes = require('./config/routes.js')
-const port = process.env.PORT
+
+useEmulator = true;
+
+if (useEmulator) {
+
+    var port = process.env.PORT
+}
+
 
 const app = express()
 app.use(cors())

@@ -1,9 +1,6 @@
 // Import the functions you need from the SDKs you need
 const { initializeApp } = require("firebase/app")
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
+const { getFirestore } = require('firebase/firestore')
 
 require("dotenv").config()
 var firebase = require("firebase/app")
@@ -20,4 +17,9 @@ var firebaseConfig = {
 // Initialize Firebase
 // const app = initializeApp(firebaseConfig);
 const fire = firebase.initializeApp(firebaseConfig)
-module.exports = fire
+    // console.log("ini fire", fire)
+
+let db = getFirestore(fire);
+// console.log("ini db di conifg", db)
+
+module.exports = { db }
